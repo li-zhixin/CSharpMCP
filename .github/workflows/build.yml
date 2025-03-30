@@ -37,7 +37,7 @@ jobs:
       run: dotnet build --configuration Release --no-restore
       
     - name: Publish
-      run: dotnet publish --configuration Release --no-build --output ./publish/${{ matrix.output-name }} -r ${{ matrix.output-name }} --self-contained true
+      run: dotnet publish CSharpMCP.csproj --configuration Release -r ${{ matrix.output-name }} --self-contained true -o ./publish/${{ matrix.output-name }}
       
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
