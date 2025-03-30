@@ -1,0 +1,47 @@
+name: Build and Upload Artifacts
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            output-name: linux-x64
+          - os: windows-latest
+            output-name: win-x64
+          - os: macos-latest
+            output-name: osx-x64
+
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 8.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore
+      
+    - name: Build
+      run: dotnet build --configuration Release --no-restore
+      
+    - name: Publish
+      run: dotnet publish --configuration Release --no-build --output ./publish/${{ matrix.output-name }} -r ${{ matrix.output-name }} --self-contained true
+      
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: CSharpMCP-${{ matrix.output-name }}
+        path: ./publish/${{ matrix.output-name }}
+        retention-days: 7
